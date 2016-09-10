@@ -8,8 +8,6 @@ import telebot
 import logging
 
 
-
-
 class TeacherAssistantBot:
 
     def __init__(self):
@@ -52,11 +50,11 @@ class TeacherAssistantBot:
             markup.add('Следующий вопрос', 'Прекратить')
             self.bot.send_message(chat_id=message.chat.id, text="Вопрос", reply_markup=markup)
 
-        @self.bot.message_handler(regexp=ur'\xE2\x9C\x85')
+        @self.bot.message_handler(regexp=u'✅')
         def about_message(message):
             self.bot.send_message(chat_id=message.chat.id, text="Вопрос добавлен")
 
-        @self.bot.message_handler(regexp=ur'\xE2\x9D\x8C')
+        @self.bot.message_handler(regexp=u'❌')
         def about_message(message):
             self.bot.send_message(chat_id=message.chat.id, text="Вопрос направлен пользователю")
             self.bot.send_message(chat_id=message.chat.id, text="Как только получу ответ - сразу же сообщу")
