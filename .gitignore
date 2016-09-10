@@ -1,2 +1,4 @@
+*.npy
+*.dic
 *.log
 *.pyc
