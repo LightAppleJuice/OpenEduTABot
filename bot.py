@@ -95,6 +95,7 @@ class TeacherAssistantBot:
                 self.bot.send_message(chat_id=message.chat.id, text=answer+" "+str(confidence), reply_markup=markup)
             else:
                 self.bot.send_message(chat_id=message.chat.id, text='Перенаправляю вопрос', reply_markup=markup)
+                self.bot.send_message(chat_id=message.chat.id, text=answer+" "+str(confidence), reply_markup=markup)
             self.bot.send_message(chat_id=message.chat.id, text='Для суперпользователя - Благодарность за ответ', reply_markup=markup)
 
     def __del__(self):

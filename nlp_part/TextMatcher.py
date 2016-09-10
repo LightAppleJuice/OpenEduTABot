@@ -166,8 +166,15 @@ class TextClassifier:
         self.logger.info("Loading data")
         if not data_base:
             data_base = workWithData()
-            data_base.addRow("привет", "1")
-            data_base.addRow("пока", "2")
+            # data_base.addRow("привет", "1")
+            # data_base.addRow("пока", "2")
+            with open("C:/Work/OpenEduTABot/nlp_part/tr_base.txt") as file_in:
+            # with open("tr_base.txt") as file_in:
+                for line in file_in:
+                    line = line.strip()
+                    q = re.split("=", line)[0]
+                    a = re.split("=", line)[1]
+                    data_base.addRow(q, a)
 
         tr_data_and_labels = data_base.readRows()
         self.tr_data_raw = tr_data_and_labels.keys()

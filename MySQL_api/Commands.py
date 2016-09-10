@@ -9,7 +9,7 @@ import logging
 class workWithData:
 
     def __init__(self):
-        config = settings()
+        self.config = settings()
 
         self.logger = logging.getLogger('BotLogger.workWithData')
         self.logger.setLevel(logging.DEBUG)
@@ -18,12 +18,12 @@ class workWithData:
         fh.setFormatter(formatter)
         self.logger.addHandler(fh)
 
-        self.connection = sqlite3.connect(config.database_name, check_same_thread=False)
+        self.connection = sqlite3.connect(self.config.database_name, check_same_thread=False)
         self.cursor = self.connection.cursor()
         self.cursor.execute('''CREATE TABLE if not exists questions (question Text(300) NOT NULL,
                                                                      answer Text(300) NOT NULL)''')
 
-        self.logger('Init done')
+        self.logger.info('Init done')
 
     def addRow(self, question, answer):
         """
