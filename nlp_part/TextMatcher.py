@@ -183,7 +183,10 @@ class TextClassifier:
 
         # self.tr_data = ["привет", "пока"]
         # self.labels_tr = ["1", "2"]
-        self.sentvecs_tr = [self.text_to_vec(sent) for sent in self.tr_data]
+        self.sentvecs_ques_tr = [self.text_to_vec(sent) for sent in self.tr_data]
+        self.sentvecs_labels_tr = [self.text_to_vec(sent.encode("utf-8")) for sent in self.labels_tr]
+        self.sentvecs_tr = [self.sentvecs_ques_tr[i] + 0.3*self.sentvecs_labels_tr[i] for i in range(len(self.sentvecs_ques_tr))]
+
 
         self.logger.info('Training classifier')
         self.sentenceClassifier.fit_sentence_classifier(self.sentvecs_tr, self.labels_tr)  # "train" nn-classifier
