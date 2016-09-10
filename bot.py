@@ -84,19 +84,37 @@ class TeacherAssistantBot:
             self.users[message.chat.id].isBusy = False
             markup = telebot.types.ReplyKeyboardHide()
             self.bot.send_message(chat_id=message.chat.id, text="Вопрос добавлен", reply_markup=markup)
-
-        @self.bot.message_handler(regexp=u'❌')
-        def about_message(message):
-            markup = telebot.types.ReplyKeyboardHide()
-            self.bot.send_message(chat_id=message.chat.id, text="Вопрос направлен пользователю", reply_markup=markup)
-            self.bot.send_message(chat_id=message.chat.id, text="Как только получу ответ - сразу же сообщу")
+            self.logger.info('Question added')
             if self.users[message.chat.id].answerQueue:
+                self.logger.info('Sending answer from queue')
                 markup = telebot.types.ReplyKeyboardMarkup(one_time_keyboard=True, resize_keyboard=True)
                 markup.add('\xE2\x9C\x85', '\xE2\x9D\x8C')
                 self.bot.send_message(chat_id=message.chat.id, text="Ответ на твой вопрос: {0}\n\n{1}".format(
                                                                     self.users[message.chat.id].answerQueue[0].question,
-                                                                    self.users[message.chat.id].answerQueue[0].answer))
-                self.users[message.chat.id].answerQueue[0]
+                                                                    self.users[message.chat.id].answerQueue[0].answer),
+                                                                    reply_markup=markup)
+                self.users[message.chat.id].answerQueue.pop(0)
+
+        @self.bot.message_handler(regexp=u'❌')
+        def about_message(message):
+            markup = telebot.types.ReplyKeyboardHide()
+            for elem in self.questionsQueue:
+                self.logger.info('Clear responder and answer')
+                if elem.sender == message.chat.id and elem not in self.users[message.chat.id].answerQueue:
+                    elem.responser = ''
+                    elem.answer = ''
+            self.bot.send_message(chat_id=message.chat.id, text="Вопрос направлен пользователю", reply_markup=markup)
+            self.bot.send_message(chat_id=message.chat.id, text="Как только получу ответ - сразу же сообщу")
+
+            if self.users[message.chat.id].answerQueue:
+                self.logger.info('Sending answer from queue')
+                markup = telebot.types.ReplyKeyboardMarkup(one_time_keyboard=True, resize_keyboard=True)
+                markup.add('\xE2\x9C\x85', '\xE2\x9D\x8C')
+                self.bot.send_message(chat_id=message.chat.id, text="Ответ на твой вопрос: {0}\n\n{1}".format(
+                                                                    self.users[message.chat.id].answerQueue[0].question,
+                                                                    self.users[message.chat.id].answerQueue[0].answer),
+                                                                    reply_markup=markup)
+                self.users[message.chat.id].answerQueue.pop(0)
 
         @self.bot.message_handler(regexp=ur'Следующий вопрос')
         def about_message(message):
