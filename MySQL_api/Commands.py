@@ -70,7 +70,7 @@ class workWithData:
 class workWithUsersData:
 
     def __init__(self):
-        config = settings()
+        self.config = settings()
 
         self.logger = logging.getLogger('BotLogger.workWithUsersData')
         self.logger.setLevel(logging.DEBUG)
@@ -79,12 +79,12 @@ class workWithUsersData:
         fh.setFormatter(formatter)
         self.logger.addHandler(fh)
 
-        self.connection = sqlite3.connect(config.users_name, check_same_thread=False)
+        self.connection = sqlite3.connect(self.config.users_name, check_same_thread=False)
         self.cursor = self.connection.cursor()
         self.cursor.execute('''CREATE TABLE if not exists users (id_token COUNTER CONSTRAINT PrimaryKey PRIMARY KEY ,
                                                                      statistics INTEGER)''')
 
-        self.logger('Init done')
+        self.logger.info('Init done')
 
     def addRow(self, id_token, statistics):
         """
