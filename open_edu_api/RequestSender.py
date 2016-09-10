@@ -27,20 +27,49 @@ class RequestSender:
         try:
             r = requests.get("https://openedu.ru/api/course_structure/v0/courses/?")
             parsed_string = r.json()
-            if r.status_code != 200:
-                raise Exception('OpenEdu exception: Bad response')
-
-            if 'error' in parsed_string:
-                if parsed_string['error'] == 403:
-                    raise Exception('OpenEdu exception: Access denied')
-                if parsed_string['error'] == 404:
-                    raise Exception('OpenEdu exception: Object not found')
-                if parsed_string['error'] == 402:
-                    raise Exception('OpenEdu exception: Incorrect request')
-                else:
-                    raise Exception('Muzis exception: Unknown exception')
-            else:
+            if r.status_code == 200:
                 print('Ok')
+            else:
+                if r.status_code == 401:
+                    raise Exception('OpenEdu exception: Unauthorized user')
+                else:
+                    raise Exception('OpenEdu exception: Unknown exception')
+        except Exception as inst:
+            self.logger.warning('getCourseList(): ' + str(inst.message))
+        except:
+            self.logger.warning('getCourseList(): ' + str(sys.exc_info()[0]))
+
+    def getLecturerList(self):
+        self.logger.info('Sending Request getLecturerList')
+        params = {'token': 123, 'limit': 1}
+        try:
+            r = requests.get("http://lectoriy.mipt.ru/api/v1/lecturer")
+            parsed_string = r.json()
+            if r.status_code == 200:
+                print('Ok')
+            else:
+                if r.status_code == 401:
+                    raise Exception('OpenEdu exception: Unauthorized user')
+                else:
+                    raise Exception('OpenEdu exception: Unknown exception')
+        except Exception as inst:
+            self.logger.warning('getCourseList(): ' + str(inst.message))
+        except:
+            self.logger.warning('getCourseList(): ' + str(sys.exc_info()[0]))
+
+    def getToken(self):
+        self.logger.info('Sending Request getLecturerList')
+        params = {'token': 'hMtae8mrtwOoqDF3T0d2CnD5APJYBoMT', 'limit': 1}
+        try:
+            r = requests.get("http://lectoriy.mipt.ru/api/v1/main", data=params)
+            parsed_string = r.json()
+            if r.status_code == 200:
+                print('Ok')
+            else:
+                if r.status_code == 401:
+                    raise Exception('OpenEdu exception: Unauthorized user')
+                else:
+                    raise Exception('OpenEdu exception: Unknown exception')
         except Exception as inst:
             self.logger.warning('getCourseList(): ' + str(inst.message))
         except:
@@ -49,4 +78,4 @@ class RequestSender:
 
 # test
 rs = RequestSender()
-rs.getCourseList()
+rs.getToken()
