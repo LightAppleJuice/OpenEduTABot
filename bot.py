@@ -4,6 +4,7 @@
 # Main Bot Class
 
 from settings import settings
+from nlp_part.TextMatcher import TextClassifier
 import telebot
 import logging
 from MySQL_api.Commands import workWithUsersData
@@ -29,6 +30,9 @@ class TeacherAssistantBot:
         formatter = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s')
         fh.setFormatter(formatter)
         self.logger.addHandler(fh)
+
+        self.logger.info('NLP init')
+        self.text_classifier = TextClassifier()
 
         self.logger.info('Bot init done')
 
@@ -96,6 +100,7 @@ class TeacherAssistantBot:
                 self.bot.send_message(chat_id=message.chat.id, text=answer+" "+str(confidence), reply_markup=markup)
             else:
                 self.bot.send_message(chat_id=message.chat.id, text='Перенаправляю вопрос', reply_markup=markup)
+                self.bot.send_message(chat_id=message.chat.id, text=answer+" "+str(confidence), reply_markup=markup)
             self.bot.send_message(chat_id=message.chat.id, text='Для суперпользователя - Благодарность за ответ', reply_markup=markup)
 
     def __del__(self):

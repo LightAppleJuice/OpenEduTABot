@@ -9,6 +9,7 @@ from sklearn.utils.validation import NotFittedError
 import re
 import numpy as np
 import logging
+from MySQL_api.Commands import workWithData
 
 
 def preprocess_train_data(train_data_in):
@@ -142,7 +143,7 @@ class SentenceClassifier:
 
 
 class TextClassifier:
-    def __init__(self):
+    def __init__(self, data_base=None):
         self.config = settings()
 
         self.logger = logging.getLogger('BotLogger.NLP')
@@ -162,9 +163,26 @@ class TextClassifier:
 
         self.logger.info('Converting tr data to vecs')
 
-        self.tr_data = ["привет", "пока"]
-        self.labels_tr = ["1", "2"]
-        # self.sentvecs_tr = np.array([self.text_to_vec(sent) for sent in self.tr_data])
+        self.logger.info("Loading data")
+        if not data_base:
+            data_base = workWithData()
+            # data_base.addRow("привет", "1")
+            # data_base.addRow("пока", "2")
+            with open("C:/Work/OpenEduTABot/nlp_part/tr_base.txt") as file_in:
+            # with open("tr_base.txt") as file_in:
+                for line in file_in:
+                    line = line.strip()
+                    q = re.split("=", line)[0]
+                    a = re.split("=", line)[1]
+                    data_base.addRow(q, a)
+
+        tr_data_and_labels = data_base.readRows()
+        self.tr_data_raw = tr_data_and_labels.keys()
+        self.tr_data = [sent.encode("utf-8") for sent in self.tr_data_raw]
+        self.labels_tr = [tr_data_and_labels[cur_key] for cur_key in self.tr_data_raw]
+
+        # self.tr_data = ["привет", "пока"]
+        # self.labels_tr = ["1", "2"]
         self.sentvecs_tr = [self.text_to_vec(sent) for sent in self.tr_data]
 
         self.logger.info('Training classifier')
