@@ -113,11 +113,11 @@ class TeacherAssistantBot:
     def LoadUsersFromDB(self):
         loader = workWithUsersData()
         loadedUsers = loader.readRows()
-        users = []
+        users = {}
         for i in loadedUsers.keys():
-            user = User(loadedUsers)
+            user = User()
             user.statistics = loadedUsers[i]
-            users.append(user)
+            users[i] = user
         self.logger.info('Users loaded from DB')
         return users
 

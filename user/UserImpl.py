@@ -4,7 +4,7 @@ import logging
 __author__ = 'g.lavrentyeva'
 
 class User:
-    def __init__(self, id):
+    def __init__(self):
         self.config = settings()
 
         self.logger = logging.getLogger('BotLogger.User')
@@ -16,15 +16,14 @@ class User:
 
         self.statistics = 0
         self.superuser = False
-        self.id_token = id
-        self.logger.info('Init done id: ', self.id_token)
+        self.logger.info('Init done')
 
     def SetSuperUser(self):
-        self.logger.info('SetSuperUser id: ', self.id_token)
+        self.logger.info('SetSuperUser')
         self.superuser = True
 
     def UnsetSuperUser(self):
-        self.logger.info('UnsetSuperUser id: ', self.id_token)
+        self.logger.info('UnsetSuperUser')
         self.superuser = False
 
 
