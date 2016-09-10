@@ -52,11 +52,13 @@ class TeacherAssistantBot:
 
         @self.bot.message_handler(regexp=u'✅')
         def about_message(message):
-            self.bot.send_message(chat_id=message.chat.id, text="Вопрос добавлен")
+            markup = telebot.types.ReplyKeyboardHide()
+            self.bot.send_message(chat_id=message.chat.id, text="Вопрос добавлен", reply_markup=markup)
 
         @self.bot.message_handler(regexp=u'❌')
         def about_message(message):
-            self.bot.send_message(chat_id=message.chat.id, text="Вопрос направлен пользователю")
+            markup = telebot.types.ReplyKeyboardHide()
+            self.bot.send_message(chat_id=message.chat.id, text="Вопрос направлен пользователю", reply_markup=markup)
             self.bot.send_message(chat_id=message.chat.id, text="Как только получу ответ - сразу же сообщу")
             self.bot.send_message(chat_id=message.chat.id, text="А пока задай другой вопрос")
 
