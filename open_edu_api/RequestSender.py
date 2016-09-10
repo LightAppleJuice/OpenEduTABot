@@ -74,8 +74,3 @@ class RequestSender:
             self.logger.warning('getCourseList(): ' + str(inst.message))
         except:
             self.logger.warning('getCourseList(): ' + str(sys.exc_info()[0]))
-
-
-# test
-rs = RequestSender()
-rs.getToken()
