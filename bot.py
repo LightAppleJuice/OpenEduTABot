@@ -9,6 +9,7 @@ from question.QuestionImpl import Question
 import telebot
 import logging
 from MySQL_api.Commands import workWithUsersData
+from MySQL_api.Commands import workWithData
 from user.UserImpl import User
 
 ChatBotID = 1
@@ -27,6 +28,7 @@ class TeacherAssistantBot:
 
         # Users db
         self.users = self.LoadUsersFromDB()
+        self.users[ChatBotID] = User()
         # Questions db
         self.questionsQueue = []
 
@@ -47,7 +49,8 @@ class TeacherAssistantBot:
                                                                 'Если у тебя возникнет вопрос, просто отправь его мне.\n'
                                                                 'Я отвечу сам или перешлю его тому, кто сможет помочь.'
                                   .format(message.from_user.first_name.encode('utf-8')))
-
+            self.users[message.chat.id] = User()
+            self.logger.info('Added new user')
             self.bot.send_message(chat_id=message.chat.id, text='Что тебя интересует?')
 
         @self.bot.message_handler(commands=['help'])
@@ -83,6 +86,12 @@ class TeacherAssistantBot:
         def about_message(message):
             self.users[message.chat.id].isBusy = False
             markup = telebot.types.ReplyKeyboardHide()
+            for elem in self.questionsQueue:
+                self.logger.info('Add answer to DB')
+                if elem.sender == message.chat.id and elem not in self.users[message.chat.id].answerQueue:
+                    db = workWithData()
+                    db.addRow(elem.question, elem.answer)
+                    self.users[elem.responder].PlusStatistics()
             self.bot.send_message(chat_id=message.chat.id, text="Вопрос добавлен", reply_markup=markup)
             self.logger.info('Question added')
             if self.users[message.chat.id].answerQueue:

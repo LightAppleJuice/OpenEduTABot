@@ -29,5 +29,8 @@ class User:
         self.logger.info('UnsetSuperUser')
         self.superuser = False
 
+    def PlusStatistics(self):
+        self.logger.info('Plus statictics for user')
+        self.statistics += 1
 
 
