@@ -6,6 +6,8 @@
 from settings import settings
 import telebot
 import logging
+from MySQL_api.Commands import workWithUsersData
+from user.UserImpl import User
 
 
 class TeacherAssistantBot:
@@ -19,6 +21,9 @@ class TeacherAssistantBot:
         self.logger = logging.getLogger('BotLogger')
         self.logger.setLevel(logging.DEBUG)
         fh = logging.FileHandler(self.config.log)
+
+        # Users db
+        self.users = self.LoadUsersFromDB()
 
         # create formatter and add it to the handlers
         formatter = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s')
@@ -39,7 +44,7 @@ class TeacherAssistantBot:
 
         @self.bot.message_handler(commands=['help'])
         def help(message):
-            self.bot.send_message(chat_id=message.chat.id, text='Я помогу тебе пройти курс Теории Игр. \n'
+            self.bot.send_message(chat_id=message.chat.id, text='Я помогу тебе пройти курс Теория Игр. \n'
                                                                 'Если у тебя возникнет вопрос, просто отправь его мне.\n'
                                                                 'Я отвечу сам или перешлю его тому, кто сможет помочь.')
 
@@ -99,6 +104,17 @@ class TeacherAssistantBot:
 
     def start(self):
         self.bot.polling(none_stop=True)
+
+    def LoadUsersFromDB(self):
+        loader = workWithUsersData()
+        loadedUsers = loader.readRows()
+        users = []
+        for i in loadedUsers.keys():
+            user = User(loadedUsers)
+            user.statistics = loadedUsers[i]
+            users.append(user)
+        self.logger.info('Users loaded from DB')
+        return users
 
 
 if __name__ == '__main__':
