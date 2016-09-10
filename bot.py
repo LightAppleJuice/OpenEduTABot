@@ -5,11 +5,13 @@
 
 from settings import settings
 from nlp_part.TextMatcher import TextClassifier
+from question.QuestionImpl import Question
 import telebot
 import logging
 from MySQL_api.Commands import workWithUsersData
 from user.UserImpl import User
 
+ChatBotID = 1
 
 class TeacherAssistantBot:
 
@@ -25,6 +27,8 @@ class TeacherAssistantBot:
 
         # Users db
         self.users = self.LoadUsersFromDB()
+        # Questions db
+        self.questionsQueue = []
 
         # create formatter and add it to the handlers
         formatter = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s')
@@ -55,10 +59,18 @@ class TeacherAssistantBot:
 
         @self.bot.message_handler(commands=['superuser'])
         def help(message):
-            self.bot.send_message(chat_id=message.chat.id, text='Теперь вам будут приходить запросы')
-            markup = telebot.types.ReplyKeyboardMarkup(one_time_keyboard=True, resize_keyboard=True)
-            markup.add('Следующий вопрос', 'Прекратить')
-            self.bot.send_message(chat_id=message.chat.id, text="Вопрос", reply_markup=markup)
+            self.bot.send_message(chat_id=message.chat.id, text='Ты перешел в режим ответа на вопросы.')
+            self.users[message.chat.id].SetSuperUser()
+
+            for elem in self.questionsQueue:
+                if (not elem.responder) and (message.chat.id not in elem.responders):
+                    markup = telebot.types.ReplyKeyboardMarkup(one_time_keyboard=True, resize_keyboard=True)
+                    markup.add('Следующий вопрос', 'Прекратить')
+                    elem.responder = message.chat.id
+                    elem.responders.append(message.chat.id)
+                    self.bot.send_message(chat_id=message.chat.id, text="Помоги мне, пожалуйста.")
+                    self.bot.send_message(chat_id=message.chat.id, text=elem.question, reply_markup=markup)
+                    break
 
         @self.bot.message_handler(commands=['teacher'])
         def help(message):
@@ -69,6 +81,7 @@ class TeacherAssistantBot:
 
         @self.bot.message_handler(regexp=u'✅')
         def about_message(message):
+            self.users[message.chat.id].isBusy = False
             markup = telebot.types.ReplyKeyboardHide()
             self.bot.send_message(chat_id=message.chat.id, text="Вопрос добавлен", reply_markup=markup)
 
@@ -77,7 +90,13 @@ class TeacherAssistantBot:
             markup = telebot.types.ReplyKeyboardHide()
             self.bot.send_message(chat_id=message.chat.id, text="Вопрос направлен пользователю", reply_markup=markup)
             self.bot.send_message(chat_id=message.chat.id, text="Как только получу ответ - сразу же сообщу")
-            self.bot.send_message(chat_id=message.chat.id, text="А пока задай другой вопрос")
+            if self.users[message.chat.id].answerQueue:
+                markup = telebot.types.ReplyKeyboardMarkup(one_time_keyboard=True, resize_keyboard=True)
+                markup.add('\xE2\x9C\x85', '\xE2\x9D\x8C')
+                self.bot.send_message(chat_id=message.chat.id, text="Ответ на твой вопрос: {0}\n\n{1}".format(
+                                                                    self.users[message.chat.id].answerQueue[0].question,
+                                                                    self.users[message.chat.id].answerQueue[0].answer))
+                self.users[message.chat.id].answerQueue[0]
 
         @self.bot.message_handler(regexp=ur'Следующий вопрос')
         def about_message(message):
@@ -87,21 +106,37 @@ class TeacherAssistantBot:
 
         @self.bot.message_handler(regexp=ur'Прекратить')
         def about_message(message):
+            self.users[message.chat.id].UnsetSuperUser()
             self.bot.send_message(chat_id=message.chat.id, text="Больше вопросов не будет")
 
         @self.bot.message_handler(func=lambda message: True, content_types=['text'])
         def parse_message(message):
             markup = telebot.types.ReplyKeyboardMarkup(one_time_keyboard=True, resize_keyboard=True)
             markup.add('\xE2\x9C\x85', '\xE2\x9D\x8C')
-            question = message.text.encode('utf-8')
-            answer, confidence = self.text_classifier.give_answer(question)
-            if confidence > 0.7:
-                self.bot.send_message(chat_id=message.chat.id, text='Для пользователя - Ответ', reply_markup=markup)
-                self.bot.send_message(chat_id=message.chat.id, text=answer+" "+str(confidence), reply_markup=markup)
+            text = message.text.encode('utf-8')
+            if self.users[message.chat.id].superuser:
+                for elem in self.questionsQueue:
+                    if elem.responder == message.chat.id:
+                        elem.answer = text
+                        self.users[elem.sender].answerQueue.append(elem)
+                        break
+                self.bot.send_message(chat_id=message.chat.id, text='Спасибо!',
+                                      reply_markup=markup)
             else:
-                self.bot.send_message(chat_id=message.chat.id, text='Перенаправляю вопрос', reply_markup=markup)
-                self.bot.send_message(chat_id=message.chat.id, text=answer+" "+str(confidence), reply_markup=markup)
-            self.bot.send_message(chat_id=message.chat.id, text='Для суперпользователя - Благодарность за ответ', reply_markup=markup)
+                question = Question(text, message.chat.id)
+                self.questionsQueue.append(question)
+                self.logger.info('Question added: ', text)
+                answer, confidence = self.text_classifier.give_answer(text)
+                if confidence > 0.7:
+                    question.answer = answer
+                    question.responder = ChatBotID
+                    self.logger.info('Answer and responder added: ', answer)
+                    self.bot.send_message(chat_id=message.chat.id, text=answer+" "+str(confidence), reply_markup=markup)
+                else:
+                    self.bot.send_message(chat_id=message.chat.id, text='Я не уверен в ответе\n'
+                                                                        'Я перенаправлю твой вопрос и напишу тебе, как только получу ответ.')
+                    #self.bot.send_message(chat_id=message.chat.id, text=answer+" "+str(confidence), reply_markup=markup)
+
 
     def __del__(self):
         self.bot.stop_polling()
