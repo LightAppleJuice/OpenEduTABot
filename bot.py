@@ -84,7 +84,13 @@ class TeacherAssistantBot:
         def parse_message(message):
             markup = telebot.types.ReplyKeyboardMarkup(one_time_keyboard=True, resize_keyboard=True)
             markup.add('\xE2\x9C\x85', '\xE2\x9D\x8C')
-            self.bot.send_message(chat_id=message.chat.id, text='Для пользователя - Ответ', reply_markup=markup)
+            question = message.text.encode('utf-8')
+            answer, confidence = self.text_classifier.give_answer(question)
+            if confidence > 0.7:
+                self.bot.send_message(chat_id=message.chat.id, text='Для пользователя - Ответ', reply_markup=markup)
+                self.bot.send_message(chat_id=message.chat.id, text=answer+" "+str(confidence), reply_markup=markup)
+            else:
+                self.bot.send_message(chat_id=message.chat.id, text='Перенаправляю вопрос', reply_markup=markup)
             self.bot.send_message(chat_id=message.chat.id, text='Для суперпользователя - Благодарность за ответ', reply_markup=markup)
 
     def __del__(self):

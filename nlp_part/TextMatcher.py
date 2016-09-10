@@ -152,12 +152,13 @@ class TextClassifier:
         fh.setFormatter(formatter)
         self.logger.addHandler(fh)
 
+        self.nn = 2
         self.logger.info('Loading w2v models')
         self.w2v_model = Word2Vec()
         self.w2v_model.load_word2vec_dictionary(self.config.w2vec_dict)
         self.w2v_model.load_word2vec_model(self.config.w2vec_model)
 
-        self.sentenceClassifier = SentenceClassifier(neighbours_num=1, weight='squared-inverse')  # can predict sentence class
+        self.sentenceClassifier = SentenceClassifier(neighbours_num=self.nn, weight='squared-inverse')  # can predict sentence class
 
         self.logger.info('Converting tr data to vecs')
 
@@ -194,7 +195,7 @@ class TextClassifier:
     def give_answer(self, question):
         que_vec = self.text_to_vec(question)
         answer, confidence, acc = self.sentenceClassifier.predict_class_with_KNN([que_vec], )
-        return answer
+        return answer[0], confidence[0]
 
     def add_to_train_data(self, question, answer):
         self.logger.info('Updating intrinsic data representations')
@@ -220,20 +221,20 @@ class TextClassifier:
 
 if __name__ == "__main__":
     text_classifier = TextClassifier()
-    print text_classifier.give_answer("привет")[0].decode('utf-8')
-    print text_classifier.give_answer("пока")[0].decode('utf-8')
-    print text_classifier.give_answer("здравствуй")[0].decode('utf-8')
-    print text_classifier.give_answer("до свидания")[0].decode('utf-8')
-    print text_classifier.give_answer("чао")[0].decode('utf-8')
+    print text_classifier.give_answer("привет")
+    print text_classifier.give_answer("пока")
+    print text_classifier.give_answer("здравствуй")
+    print text_classifier.give_answer("до свидания")
+    print text_classifier.give_answer("чао")
     print "Add 3"
     text_classifier.add_to_train_data("здравствуй", "3")
-    print text_classifier.give_answer("здравствуй")[0].decode('utf-8')
+    print text_classifier.give_answer("здравствуй")
     print "Remove 1"
     text_classifier.remove_from_train_data("привет")
     print [sent.decode('utf-8') for sent in text_classifier.tr_data]
-    print text_classifier.give_answer("привет")[0].decode('utf-8')
-    print text_classifier.give_answer("пока")[0].decode('utf-8')
-    print text_classifier.give_answer("здравствуй")[0].decode('utf-8')
+    print text_classifier.give_answer("привет")
+    print text_classifier.give_answer("пока")
+    print text_classifier.give_answer("здравствуй")
 
 
 
