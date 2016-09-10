@@ -21,6 +21,6 @@ class RequestSender:
         fh.setFormatter(formatter)
         self.logger.addHandler(fh)
 
-        self.matching = dict()
-        self.CNNstyles = []
-        self.loadMatching()
+    def sendRequest(self):
+        self.logger.info('Sending Request')
+
