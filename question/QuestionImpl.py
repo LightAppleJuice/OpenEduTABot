@@ -1,11 +1,5 @@
-import requests
 from settings import settings
-import os
 import logging
-import io
-import numpy as np
-import sys
-import urllib2
 
 __author__ = 'g.lavrentyeva'
 
@@ -24,3 +18,5 @@ class Question:
         self.question = ''
         self.answer = ''
         self.responder = ''
+
+        self.logger.info('Init done')

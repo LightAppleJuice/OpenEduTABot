@@ -15,6 +15,7 @@ class User:
         self.logger.addHandler(fh)
 
         self.superuser = False
+        self.logger.info('Init done')
 
     def SetSuperUser(self):
         self.logger.info('SetSuperUser')
