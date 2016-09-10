@@ -29,12 +29,20 @@ class TeacherAssistantBot:
 
         @self.bot.message_handler(commands=['start'])
         def start(message):
-            self.bot.send_message(chat_id=message.chat.id, text='Приветствие')
-            self.bot.send_message(chat_id=message.chat.id, text='Предложение задать вопрос')
+            self.bot.send_message(chat_id=message.chat.id, text='Здравствуй, {0}!\n'
+                                                                'Я помогу тебе пройти курс Теория Игр. \n'
+                                                                'Если у тебя возникнет вопрос, просто отправь его мне.\n'
+                                                                'Я отвечу сам или перешлю его тому, кто сможет помочь.'
+                                  .format(message.from_user.first_name.encode('utf-8')))
+
+            self.bot.send_message(chat_id=message.chat.id, text='Что тебя интересует?')
 
         @self.bot.message_handler(commands=['help'])
         def help(message):
-            self.bot.send_message(chat_id=message.chat.id, text='Описние функционала')
+            self.bot.send_message(chat_id=message.chat.id, text='Я помогу тебе пройти курс Теории Игр. \n'
+                                                                'Если у тебя возникнет вопрос, просто отправь его мне.\n'
+                                                                'Я отвечу сам или перешлю его тому, кто сможет помочь.')
+
 
         @self.bot.message_handler(commands=['superuser'])
         def help(message):
