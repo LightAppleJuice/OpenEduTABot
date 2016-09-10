@@ -4,6 +4,7 @@
 # Main Bot Class
 
 from settings import settings
+from nlp_part.TextMatcher import TextClassifier
 import telebot
 import logging
 
@@ -24,6 +25,9 @@ class TeacherAssistantBot:
         formatter = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s')
         fh.setFormatter(formatter)
         self.logger.addHandler(fh)
+
+        self.logger.info('NLP init')
+        self.text_classifier = TextClassifier()
 
         self.logger.info('Bot init done')
 
