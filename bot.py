@@ -49,7 +49,8 @@ class TeacherAssistantBot:
                                                                 'Если у тебя возникнет вопрос, просто отправь его мне.\n'
                                                                 'Я отвечу сам или перешлю его тому, кто сможет помочь.'
                                   .format(message.from_user.first_name.encode('utf-8')))
-            self.users[message.chat.id] = User()
+            if message.chat.id not in self.users.keys():
+                self.users[message.chat.id] = User()
             self.logger.info('Added new user')
             self.bot.send_message(chat_id=message.chat.id, text='Что тебя интересует?')
 
@@ -61,7 +62,9 @@ class TeacherAssistantBot:
 
 
         @self.bot.message_handler(commands=['superuser'])
-        def help(message):
+        def superuser(message)
+            if message.chat.id not in self.users.keys():
+                self.users[message.chat.id] = User()
             self.bot.send_message(chat_id=message.chat.id, text='Ты перешел в режим ответа на вопросы.')
             self.users[message.chat.id].SetSuperUser()
 
@@ -76,15 +79,18 @@ class TeacherAssistantBot:
                     break
 
         @self.bot.message_handler(commands=['teacher'])
-        def help(message):
+        def teacher(message):
+            if message.chat.id not in self.users.keys():
+                self.users[message.chat.id] = User()
             self.bot.send_message(chat_id=message.chat.id, text='Теперь вам будут приходить все отвеченные вопросы')
             markup = telebot.types.ReplyKeyboardMarkup(one_time_keyboard=True, resize_keyboard=True)
             markup.add('Следующий вопрос', 'Прекратить')
             self.bot.send_message(chat_id=message.chat.id, text="Вопрос", reply_markup=markup)
 
         @self.bot.message_handler(regexp=u'✅')
-        def about_message(message):
-            self.users[message.chat.id].isBusy = False
+        def apply_message(message):
+            if message.chat.id not in self.users.keys():
+                self.users[message.chat.id] = User()
             markup = telebot.types.ReplyKeyboardHide()
             for elem in self.questionsQueue:
                 self.logger.info('Add answer to DB')
@@ -105,7 +111,9 @@ class TeacherAssistantBot:
                 self.users[message.chat.id].answerQueue.pop(0)
 
         @self.bot.message_handler(regexp=u'❌')
-        def about_message(message):
+        def cancel_message(message):
+            if message.chat.id not in self.users.keys():
+                self.users[message.chat.id] = User()
             markup = telebot.types.ReplyKeyboardHide()
             for elem in self.questionsQueue:
                 self.logger.info('Clear responder and answer')
@@ -126,13 +134,17 @@ class TeacherAssistantBot:
                 self.users[message.chat.id].answerQueue.pop(0)
 
         @self.bot.message_handler(regexp=ur'Следующий вопрос')
-        def about_message(message):
+        def next_message(message):
+            if message.chat.id not in self.users.keys():
+                self.users[message.chat.id] = User()
             markup = telebot.types.ReplyKeyboardMarkup(one_time_keyboard=True, resize_keyboard=True)
             markup.add('Следующий вопрос', 'Прекратить')
             self.bot.send_message(chat_id=message.chat.id, text="Вопрос", reply_markup=markup)
 
         @self.bot.message_handler(regexp=ur'Прекратить')
-        def about_message(message):
+        def stop_message(message):
+            if message.chat.id not in self.users.keys():
+                self.users[message.chat.id] = User()
             self.users[message.chat.id].UnsetSuperUser()
             self.bot.send_message(chat_id=message.chat.id, text="Больше вопросов не будет")
 
@@ -156,7 +168,7 @@ class TeacherAssistantBot:
                 self.questionsQueue.append(question)
                 self.logger.info('Question added: %s' % text)
                 answer, confidence = self.text_classifier.give_answer(text)
-                answer = str(answer)
+                answer = answer.encode('utf-8')
                 if confidence > 0.7:
                     question.answer = answer
                     question.responder = ChatBotID
