@@ -117,6 +117,9 @@ class TeacherAssistantBot:
                 if elem.sender == message.chat.id and elem in self.users[message.chat.id].answerQueue and elem.responder == ChatBotID:
                     db = workWithData()
                     db.addRow(elem.question, elem.answer)
+                    print type(elem.question)
+                    print type(elem.answer)
+                    self.text_classifier.add_to_train_data(elem.question, elem.answer)
                     if elem.stat_responder:
                         stat = self.users[elem.stat_responder].PlusStatistics()
                         if stat:
