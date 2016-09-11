@@ -179,6 +179,9 @@ class TeacherAssistantBot:
             markup = telebot.types.ReplyKeyboardMarkup(one_time_keyboard=True, resize_keyboard=True)
             markup.add('Следующий вопрос', 'Прекратить')
             for elem in self.questionsQueue:
+                if elem.responder == message.chat.id and elem.answer == '':
+                    elem.responder = ''
+            for elem in self.questionsQueue:
                 # a = elem.responder
                 # b=elem.responders
                 if (not elem.responder) and (message.chat.id not in elem.responders):
@@ -246,7 +249,7 @@ class TeacherAssistantBot:
                     self.users[message.chat.id].answerQueue.append(question)
                     self.logger.info('Answer and responder added: %s' % answer)
                     markup.add('\xE2\x9C\x85', '\xE2\x9D\x8C')
-                    self.bot.send_message(chat_id=message.chat.id, text=answer+" "+str(confidence), reply_markup=markup)
+                    self.bot.send_message(chat_id=message.chat.id, text=answer, reply_markup=markup)
                     self.waitingResponse = True
                 else:
                     self.bot.send_message(chat_id=message.chat.id, text='Я не уверен в ответе\n'

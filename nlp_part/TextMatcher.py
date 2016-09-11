@@ -186,7 +186,7 @@ class TextClassifier:
         # self.labels_tr = ["1", "2"]
         self.sentvecs_ques_tr = [self.text_to_vec(sent) for sent in self.tr_data]
         self.sentvecs_labels_tr = [self.text_to_vec(sent) for sent in self.labels_tr]
-        self.sentvecs_tr = [self.sentvecs_ques_tr[i] + 0.0*self.sentvecs_labels_tr[i] for i in range(len(self.sentvecs_ques_tr))]
+        self.sentvecs_tr = [self.sentvecs_ques_tr[i] + 0.1*self.sentvecs_labels_tr[i] for i in range(len(self.sentvecs_ques_tr))]
 
 
         self.logger.info('Training classifier')
