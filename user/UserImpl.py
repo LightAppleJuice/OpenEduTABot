@@ -16,7 +16,10 @@ class User:
 
         self.statistics = 0
         self.superuser = False
+        self.teacher = False
         self.logger.info('Init done')
+        self.isBusy = False
+        self.answerQueue = []
 
     def SetSuperUser(self):
         self.logger.info('SetSuperUser')
@@ -25,5 +28,9 @@ class User:
     def UnsetSuperUser(self):
         self.logger.info('UnsetSuperUser')
         self.superuser = False
+
+    def PlusStatistics(self):
+        self.logger.info('Plus statictics for user')
+        self.statistics += 1
 
 
