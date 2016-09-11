@@ -62,7 +62,8 @@ class TeacherAssistantBot:
             self.bot.send_message(chat_id=message.chat.id, text='Здравствуй, {0}!\n'
                                                                 'Я помогу тебе пройти курс Теория Игр. \n'
                                                                 'Если у тебя возникнет вопрос, просто отправь его мне.\n'
-                                                                'Я отвечу сам или перешлю его тому, кто сможет помочь.'
+                                                                'Я отвечу сам или перешлю его тому, кто сможет помочь.\n'
+                                                                'Введи команду /superhero и ты можешь отвечать на вопросы других.'
                                   .format(message.from_user.first_name.encode('utf-8')), reply_markup=markup)
             if message.chat.id not in self.users.keys():
                 self.users[message.chat.id] = User()
@@ -73,7 +74,8 @@ class TeacherAssistantBot:
         def help(message):
             self.bot.send_message(chat_id=message.chat.id, text='Я помогу тебе пройти курс Теория Игр. \n'
                                                                 'Если у тебя возникнет вопрос, просто отправь его мне.\n'
-                                                                'Я отвечу сам или перешлю его тому, кто сможет помочь.')
+                                                                'Я отвечу сам или перешлю его тому, кто сможет помочь.\n'
+                                                                'Введи команду /superhero и ты можешь отвечать на вопросы других.'
 
 
         @self.bot.message_handler(commands=['superhero'])
@@ -122,7 +124,7 @@ class TeacherAssistantBot:
                             self.bot.send_message(chat_id=message.chat.id, text="Поздравляю! Ты достиг уровня " + superhero_names[stat-1] + "!", reply_markup=markup)
                     self.questionsQueue.remove(elem)
                     self.users[message.chat.id].answerQueue.remove(elem)
-            self.bot.send_message(chat_id=message.chat.id, text="Вопрос добавлен", reply_markup=markup)
+            self.bot.send_message(chat_id=message.chat.id, text="Вопрос добавлен. Cпасибо!\n Введи другой вопрос или перейди в режим ответа на вопросы.", reply_markup=markup)
             self.logger.info('Question added')
             if self.users[message.chat.id].answerQueue:
                 self.logger.info('Sending answer from queue')
@@ -133,6 +135,9 @@ class TeacherAssistantBot:
                                                                     self.users[message.chat.id].answerQueue[0].question,
                                                                     self.users[message.chat.id].answerQueue[0].answer),
                                                                     reply_markup=markup, parse_mode='Markdown')
+                self.bot.send_message(chat_id=message.chat.id,
+                                      text="Оцени полученный ответ и мы сможем продолжить.",
+                                      reply_markup=markup)
                 self.waitingResponse = True
                 self.users[message.chat.id].answerQueue[0].stat_responder = self.users[message.chat.id].answerQueue[
                     0].responder
@@ -151,7 +156,8 @@ class TeacherAssistantBot:
                     elem.answer = ''
                     self.users[message.chat.id].answerQueue.remove(elem)
             self.bot.send_message(chat_id=message.chat.id, text="Вопрос направлен пользователю", reply_markup=markup)
-            self.bot.send_message(chat_id=message.chat.id, text="Как только получу ответ - сразу же сообщу")
+            self.bot.send_message(chat_id=message.chat.id, text="Как только получу ответ - сразу же сообщу\n"
+                                                                "А пока задай мне другой вопрос или перейди в режим ответа на вопросы.")
 
             if self.users[message.chat.id].answerQueue:
                 self.logger.info('Sending answer from queue')
