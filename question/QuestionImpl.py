@@ -28,11 +28,11 @@ class Question:
         db = workWithData()
         if self.question and self.answer:
             db.addRow(self.question, self.answer)
-        self.logger.info('Save question to DB: ', self.question)
+        self.logger.info('Save question to DB: %s' % self.question)
 
     def DeleteFromDB(self):
         db = workWithData()
         if self.question:
             db.removeRow(self.question)
-        self.logger.info('Remove question from DB: ', self.question)
+        self.logger.info('Remove question from DB: %s' % self.question)
 
