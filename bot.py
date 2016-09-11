@@ -42,13 +42,16 @@ class TeacherAssistantBot:
 
         self.logger.info('Bot init done')
 
+        self.waitingResponse = False
+
         @self.bot.message_handler(commands=['start'])
         def start(message):
+            markup = telebot.types.ReplyKeyboardHide()
             self.bot.send_message(chat_id=message.chat.id, text='Здравствуй, {0}!\n'
                                                                 'Я помогу тебе пройти курс Теория Игр. \n'
                                                                 'Если у тебя возникнет вопрос, просто отправь его мне.\n'
                                                                 'Я отвечу сам или перешлю его тому, кто сможет помочь.'
-                                  .format(message.from_user.first_name.encode('utf-8')))
+                                  .format(message.from_user.first_name.encode('utf-8')), reply_markup=markup)
             if message.chat.id not in self.users.keys():
                 self.users[message.chat.id] = User()
             self.logger.info('Added new user')
@@ -65,10 +68,14 @@ class TeacherAssistantBot:
         def superuser(message):
             if message.chat.id not in self.users.keys():
                 self.users[message.chat.id] = User()
-            self.bot.send_message(chat_id=message.chat.id, text='Ты перешел в режим ответа на вопросы.')
+            markup = telebot.types.ReplyKeyboardHide()
+            self.bot.send_message(chat_id=message.chat.id, text='Ты перешел в режим ответа на вопросы.',
+                                  reply_markup=markup)
             self.users[message.chat.id].SetSuperUser()
 
             for elem in self.questionsQueue:
+                # a = elem.responder
+                # b=elem.responders
                 if (not elem.responder) and (message.chat.id not in elem.responders):
                     markup = telebot.types.ReplyKeyboardMarkup(one_time_keyboard=True, resize_keyboard=True)
                     markup.add('Следующий вопрос', 'Прекратить')
@@ -94,21 +101,29 @@ class TeacherAssistantBot:
             markup = telebot.types.ReplyKeyboardHide()
             for elem in self.questionsQueue:
                 self.logger.info('Add answer to DB')
-                if elem.sender == message.chat.id and elem not in self.users[message.chat.id].answerQueue:
+                if elem.sender == message.chat.id and elem in self.users[message.chat.id].answerQueue and elem.responder == ChatBotID:
                     db = workWithData()
                     db.addRow(elem.question, elem.answer)
-                    self.users[elem.responder].PlusStatistics()
+                    #self.users[elem.responder].PlusStatistics()
+                    self.questionsQueue.remove(elem)
+                    self.users[message.chat.id].answerQueue.remove(elem)
             self.bot.send_message(chat_id=message.chat.id, text="Вопрос добавлен", reply_markup=markup)
             self.logger.info('Question added')
             if self.users[message.chat.id].answerQueue:
                 self.logger.info('Sending answer from queue')
                 markup = telebot.types.ReplyKeyboardMarkup(one_time_keyboard=True, resize_keyboard=True)
                 markup.add('\xE2\x9C\x85', '\xE2\x9D\x8C')
-                self.bot.send_message(chat_id=message.chat.id, text="Ответ на твой вопрос: {0}\n\n{1}".format(
+                self.bot.send_message(chat_id=message.chat.id,
+                                      text="Кстати, я нашел ответ на вопрос, который ты мне задавал\n *Вопрос*: {0}\n *Ответ*: {1}".format(
                                                                     self.users[message.chat.id].answerQueue[0].question,
                                                                     self.users[message.chat.id].answerQueue[0].answer),
-                                                                    reply_markup=markup)
-                self.users[message.chat.id].answerQueue.pop(0)
+                                                                    reply_markup=markup, parse_mode='Markdown')
+
+                self.users[message.chat.id].answerQueue[0].responder = ChatBotID
+                #self.users[elem.responder].PlusStatistics()
+                #elem = self.users[message.chat.id].answerQueue(0)
+                #self.users[message.chat.id].answerQueue.remove(elem)
+                #self.questionsQueue.remove(elem)
 
         @self.bot.message_handler(regexp=u'❌')
         def cancel_message(message):
@@ -117,9 +132,10 @@ class TeacherAssistantBot:
             markup = telebot.types.ReplyKeyboardHide()
             for elem in self.questionsQueue:
                 self.logger.info('Clear responder and answer')
-                if elem.sender == message.chat.id and elem not in self.users[message.chat.id].answerQueue:
-                    elem.responser = ''
+                if elem.sender == message.chat.id and elem in self.users[message.chat.id].answerQueue:
+                    elem.responder = ''
                     elem.answer = ''
+                    self.users[message.chat.id].answerQueue.remove(elem)
             self.bot.send_message(chat_id=message.chat.id, text="Вопрос направлен пользователю", reply_markup=markup)
             self.bot.send_message(chat_id=message.chat.id, text="Как только получу ответ - сразу же сообщу")
 
@@ -139,7 +155,20 @@ class TeacherAssistantBot:
                 self.users[message.chat.id] = User()
             markup = telebot.types.ReplyKeyboardMarkup(one_time_keyboard=True, resize_keyboard=True)
             markup.add('Следующий вопрос', 'Прекратить')
-            self.bot.send_message(chat_id=message.chat.id, text="Вопрос", reply_markup=markup)
+            for elem in self.questionsQueue:
+                # a = elem.responder
+                # b=elem.responders
+                if (not elem.responder) and (message.chat.id not in elem.responders):
+                    elem.responder = message.chat.id
+                    elem.responders.append(message.chat.id)
+                    self.bot.send_message(chat_id=message.chat.id, text="Помоги мне, пожалуйста.")
+                    self.bot.send_message(chat_id=message.chat.id, text=elem.question, reply_markup=markup)
+                    break
+            else:
+                markup = telebot.types.ReplyKeyboardHide()
+                self.users[message.chat.id].UnsetSuperUser()
+                self.bot.send_message(chat_id=message.chat.id, text="Больше вопросов не будет. Выхожу из режима "
+                                                                    "SuperUser.", markup = markup)
 
         @self.bot.message_handler(regexp=ur'Прекратить')
         def stop_message(message):
@@ -151,7 +180,6 @@ class TeacherAssistantBot:
         @self.bot.message_handler(func=lambda message: True, content_types=['text'])
         def parse_message(message):
             markup = telebot.types.ReplyKeyboardMarkup(one_time_keyboard=True, resize_keyboard=True)
-            markup.add('\xE2\x9C\x85', '\xE2\x9D\x8C')
             text = message.text.encode('utf-8')
             if message.chat.id not in self.users.keys():
                 self.users[message.chat.id] = User()
@@ -161,9 +189,27 @@ class TeacherAssistantBot:
                         elem.answer = text
                         self.users[elem.sender].answerQueue.append(elem)
                         break
+                markup.add('Следующий вопрос', 'Прекратить')
                 self.bot.send_message(chat_id=message.chat.id, text='Спасибо!',
                                       reply_markup=markup)
+                for elem in self.questionsQueue:
+                    # a = elem.responder
+                    # b=elem.responders
+                    if (not elem.responder) and (message.chat.id not in elem.responders):
+                        elem.responder = message.chat.id
+                        elem.responders.append(message.chat.id)
+                        self.bot.send_message(chat_id=message.chat.id, text="Помоги мне, пожалуйста.")
+                        self.bot.send_message(chat_id=message.chat.id, text=elem.question, reply_markup=markup)
+                        break
+                else:
+                    markup=telebot.types.ReplyKeyboardHide()
+                    self.users[message.chat.id].UnsetSuperUser()
+                    self.bot.send_message(chat_id=message.chat.id,
+                                          text="Больше вопросов не будет. Выхожу из режима SuperUser.", markup=markup)
+
             else:
+                if self.waitingResponse:
+
                 question = Question(text, message.chat.id)
                 self.questionsQueue.append(question)
                 self.logger.info('Question added: %s' % text)
@@ -172,8 +218,11 @@ class TeacherAssistantBot:
                 if confidence > 0.7:
                     question.answer = answer
                     question.responder = ChatBotID
+                    self.users[message.chat.id].answerQueue.append(question)
                     self.logger.info('Answer and responder added: %s' % answer)
+                    markup.add('\xE2\x9C\x85', '\xE2\x9D\x8C')
                     self.bot.send_message(chat_id=message.chat.id, text=answer+" "+str(confidence), reply_markup=markup)
+                    self.waitingResponse = True
                 else:
                     self.bot.send_message(chat_id=message.chat.id, text='Я не уверен в ответе\n'
                                                                         'Я перенаправлю твой вопрос и напишу тебе, как только получу ответ.')
