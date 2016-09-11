@@ -141,7 +141,7 @@ class TeacherAssistantBot:
             markup = telebot.types.ReplyKeyboardMarkup(one_time_keyboard=True, resize_keyboard=True)
             markup.add('\xE2\x9C\x85', '\xE2\x9D\x8C')
             text = message.text.encode('utf-8')
-            if not self.users[message.chat.id]:
+            if message.chat.id not in self.users.keys():
                 self.users[message.chat.id] = User()
             if self.users[message.chat.id].superuser:
                 for elem in self.questionsQueue:
