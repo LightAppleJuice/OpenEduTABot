@@ -239,7 +239,7 @@ class TeacherAssistantBot:
                 self.questionsQueue.append(question)
                 self.logger.info('Question added: %s' % text)
                 answer, confidence = self.text_classifier.give_answer(text)
-                answer = answer.encode('utf-8')
+                # answer = answer.encode('utf-8')
                 if confidence > 0.7:
                     question.answer = answer
                     question.responder = ChatBotID

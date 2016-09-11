@@ -181,10 +181,11 @@ class TextClassifier:
         self.tr_data = [sent.encode("utf-8") for sent in self.tr_data_raw]
         self.labels_tr = [tr_data_and_labels[cur_key].encode("utf-8") for cur_key in self.tr_data_raw]
 
+
         # self.tr_data = ["привет", "пока"]
         # self.labels_tr = ["1", "2"]
         self.sentvecs_ques_tr = [self.text_to_vec(sent) for sent in self.tr_data]
-        self.sentvecs_labels_tr = [self.text_to_vec(sent.encode("utf-8")) for sent in self.labels_tr]
+        self.sentvecs_labels_tr = [self.text_to_vec(sent) for sent in self.labels_tr]
         self.sentvecs_tr = [self.sentvecs_ques_tr[i] + 0.0*self.sentvecs_labels_tr[i] for i in range(len(self.sentvecs_ques_tr))]
 
 
