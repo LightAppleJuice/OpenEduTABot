@@ -166,8 +166,15 @@ class TextClassifier:
         self.logger.info("Loading data")
         if not data_base:
             data_base = workWithData()
-            data_base.addRow("привет", "1")
-            data_base.addRow("пока", "2")
+            # data_base.addRow("привет", "1")
+            # data_base.addRow("пока", "2")
+            with open("C:/Work/OpenEduTABot/nlp_part/tr_base.txt") as file_in:
+            # with open("tr_base.txt") as file_in:
+                for line in file_in:
+                    line = line.strip()
+                    q = re.split("=", line)[0]
+                    a = re.split("=", line)[1]
+                    data_base.addRow(q, a)
 
         tr_data_and_labels = data_base.readRows()
         self.tr_data_raw = tr_data_and_labels.keys()
@@ -176,7 +183,10 @@ class TextClassifier:
 
         # self.tr_data = ["привет", "пока"]
         # self.labels_tr = ["1", "2"]
-        self.sentvecs_tr = [self.text_to_vec(sent) for sent in self.tr_data]
+        self.sentvecs_ques_tr = [self.text_to_vec(sent) for sent in self.tr_data]
+        self.sentvecs_labels_tr = [self.text_to_vec(sent.encode("utf-8")) for sent in self.labels_tr]
+        self.sentvecs_tr = [self.sentvecs_ques_tr[i] + 0.3*self.sentvecs_labels_tr[i] for i in range(len(self.sentvecs_ques_tr))]
+
 
         self.logger.info('Training classifier')
         self.sentenceClassifier.fit_sentence_classifier(self.sentvecs_tr, self.labels_tr)  # "train" nn-classifier
