@@ -6,7 +6,7 @@ __author__ = 'g.lavrentyeva'
 
 
 class Question:
-    def __init__(self):
+    def __init__(self, text, sender):
         self.config = settings()
 
         self.logger = logging.getLogger('BotLogger.Question')
@@ -16,10 +16,11 @@ class Question:
         fh.setFormatter(formatter)
         self.logger.addHandler(fh)
 
-        self.sender = ''
-        self.question = ''
+        self.sender = sender
+        self.question = text
         self.answer = ''
         self.responder = ''
+        self.responders = []
 
         self.logger.info('Init done')
 
