@@ -20,6 +20,12 @@ superhero_stickers = ['BQADBAAD0BQAArCKyAeOPZ8LYo3sYgI',
                       'BQADAgADQgAD7sShCsZ_Xcqe-dHLAg']
 
 
+superhero_names = ['Зеленой стрелы',
+                      'Капитана Америка',
+                      'Халка',
+                      'Железного Человека',
+                      'Счастливого Единорога']
+
 class TeacherAssistantBot:
 
     def __init__(self):
@@ -112,8 +118,8 @@ class TeacherAssistantBot:
                     if elem.stat_responder:
                         stat = self.users[elem.stat_responder].PlusStatistics()
                         if stat:
-                            self.bot.send_sticker(chat_id=message.chat.id, sti=superhero_stickers[stat])
-                            self.bot.send_message(chat_id=message.chat.id, text="Поздравляю! Ты достиг уровня ", reply_markup=markup)
+                            self.bot.send_sticker(chat_id=message.chat.id, data=superhero_stickers[stat - 1])
+                            self.bot.send_message(chat_id=message.chat.id, text="Поздравляю! Ты достиг уровня " + superhero_names[stat-1] + "!", reply_markup=markup)
                     self.questionsQueue.remove(elem)
                     self.users[message.chat.id].answerQueue.remove(elem)
             self.bot.send_message(chat_id=message.chat.id, text="Вопрос добавлен", reply_markup=markup)
@@ -176,7 +182,7 @@ class TeacherAssistantBot:
                 markup = telebot.types.ReplyKeyboardHide()
                 self.users[message.chat.id].UnsetSuperUser()
                 self.bot.send_message(chat_id=message.chat.id, text="Больше вопросов не будет. Выхожу из режима "
-                                                                    "SuperUser.", markup = markup)
+                                                                    "SuperUser.", reply_markup = markup)
 
         @self.bot.message_handler(regexp=ur'Прекратить')
         def stop_message(message):
