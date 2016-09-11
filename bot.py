@@ -123,8 +123,8 @@ class TeacherAssistantBot:
                     if elem.stat_responder:
                         stat = self.users[elem.stat_responder].PlusStatistics()
                         if stat:
-                            self.bot.send_sticker(chat_id=message.chat.id, data=superhero_stickers[stat - 1])
-                            self.bot.send_message(chat_id=message.chat.id, text="Поздравляю! Ты достиг уровня " + superhero_names[stat-1] + "!", reply_markup=markup)
+                            self.bot.send_sticker(chat_id=elem.stat_responder, data=superhero_stickers[stat - 1])
+                            self.bot.send_message(chat_id=elem.stat_responder, text="Поздравляю! Ты достиг уровня " + superhero_names[stat-1] + "!", reply_markup=markup)
                     self.questionsQueue.remove(elem)
                     self.users[message.chat.id].answerQueue.remove(elem)
             self.bot.send_message(chat_id=message.chat.id, text="Вопрос добавлен. Cпасибо!\nВведи другой вопрос или перейди в режим ответа на вопросы.", reply_markup=markup)
@@ -279,4 +279,10 @@ class TeacherAssistantBot:
 
 if __name__ == '__main__':
     Bot = TeacherAssistantBot()
-    Bot.start()
+    while True:
+        try:
+            Bot.start()
+        except:
+            print('Oops! I did it again...')
+
+
