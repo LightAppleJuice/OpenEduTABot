@@ -62,7 +62,7 @@ class TeacherAssistantBot:
 
 
         @self.bot.message_handler(commands=['superuser'])
-        def superuser(message)
+        def superuser(message):
             if message.chat.id not in self.users.keys():
                 self.users[message.chat.id] = User()
             self.bot.send_message(chat_id=message.chat.id, text='Ты перешел в режим ответа на вопросы.')
