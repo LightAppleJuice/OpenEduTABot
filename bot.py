@@ -154,12 +154,13 @@ class TeacherAssistantBot:
             else:
                 question = Question(text, message.chat.id)
                 self.questionsQueue.append(question)
-                self.logger.info('Question added: ', text)
+                self.logger.info('Question added: %s' % text)
                 answer, confidence = self.text_classifier.give_answer(text)
+                answer = str(answer)
                 if confidence > 0.7:
                     question.answer = answer
                     question.responder = ChatBotID
-                    self.logger.info('Answer and responder added: ', answer)
+                    self.logger.info('Answer and responder added: %s' % answer)
                     self.bot.send_message(chat_id=message.chat.id, text=answer+" "+str(confidence), reply_markup=markup)
                 else:
                     self.bot.send_message(chat_id=message.chat.id, text='Я не уверен в ответе\n'

@@ -59,7 +59,7 @@ class workWithData:
         with self.connection:
             self.cursor.execute(sqlStrDel)
 
-        self.logger.info('Added question: ', question)
+        self.logger.info('Added question: %s' % question)
 
     def __del__(self):
         self.cursor.close()
@@ -99,7 +99,7 @@ class workWithUsersData:
             self.cursor.execute(sqlStrDel)
             self.cursor.execute(sqlStr)
 
-        self.logger.info('Added user, id_token: ', id_token)
+        self.logger.info('Added user, id_token: %s' % id_token)
 
     def readRows(self):
         """
@@ -122,7 +122,7 @@ class workWithUsersData:
         sqlStrDel = "DELETE FROM users WHERE id_token={0}".format(id_token)
         with self.connection:
             self.cursor.execute(sqlStrDel)
-        self.logger.info('Row removed id_token:', id_token)
+        self.logger.info('Row removed id_token: %s' % id_token)
 
     def __del__(self):
         self.cursor.close()

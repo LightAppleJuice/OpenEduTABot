@@ -168,7 +168,7 @@ class TextClassifier:
             data_base = workWithData()
             # data_base.addRow("привет", "1")
             # data_base.addRow("пока", "2")
-            with open("C:/Work/OpenEduTABot/nlp_part/tr_base.txt") as file_in:
+            with open("nlp_part/tr_base.txt") as file_in:
             # with open("tr_base.txt") as file_in:
                 for line in file_in:
                     line = line.strip()
