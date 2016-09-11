@@ -232,7 +232,7 @@ class TeacherAssistantBot:
                     markup = telebot.types.ReplyKeyboardHide()
                     self.users[message.chat.id].UnsetSuperUser()
                     self.bot.send_message(chat_id=message.chat.id,
-                                          text="Больше вопросов не будет. Выхожу из режима SuperUser.", reply_markup=markup)
+                                          text="Больше вопросов не будет. Выхожу из режима Superhero.", reply_markup=markup)
 
             else:
                 if self.waitingResponse:
