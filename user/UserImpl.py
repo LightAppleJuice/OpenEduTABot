@@ -32,5 +32,20 @@ class User:
     def PlusStatistics(self):
         self.logger.info('Plus statictics for user')
         self.statistics += 1
+        if self.statistics == 1:
+            return 1
+        elif self.statistics == 10:
+            return 2
+        elif self.statistics == 100:
+            return 3
+        elif self.statistics == 200:
+            return 4
+        elif self.statistics == 300:
+            return 5
+        else:
+            return 0
+
+
+
 
 

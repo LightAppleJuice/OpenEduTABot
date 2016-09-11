@@ -21,6 +21,7 @@ class Question:
         self.answer = ''
         self.responder = ''
         self.responders = []
+        self.stat_responder = 0
 
         self.logger.info('Init done')
 
