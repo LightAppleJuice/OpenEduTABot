@@ -75,7 +75,7 @@ class TeacherAssistantBot:
             self.bot.send_message(chat_id=message.chat.id, text='Я помогу тебе пройти курс Теория Игр. \n'
                                                                 'Если у тебя возникнет вопрос, просто отправь его мне.\n'
                                                                 'Я отвечу сам или перешлю его тому, кто сможет помочь.\n'
-                                                                'Введи команду /superhero и ты можешь отвечать на вопросы других.'
+                                                                'Введи команду /superhero и ты можешь отвечать на вопросы других.')
 
 
         @self.bot.message_handler(commands=['superhero'])
