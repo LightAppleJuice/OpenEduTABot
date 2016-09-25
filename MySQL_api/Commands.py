@@ -151,14 +151,23 @@ class workWithData:
                  .format(id_responder)
         with self.connection:
             answered = self.cursor.execute(sqlStr).fetchall()
+            if len(answered) > 1:
+                raise Exception('Commands: Incorrect SQL response - too long answered count')
+            answered = answered[0][0]
 
         sqlStr = "SELECT COUNT(*) FROM questions WHERE id_responder = {0} AND checked=1".format(id_responder)
         with self.connection:
             checked = self.cursor.execute(sqlStr).fetchall()
+            if len(checked) > 1:
+                raise Exception('Commands: Incorrect SQL response - too long checked count')
+            checked = checked[0][0]
 
         sqlStr = "SELECT COUNT(*) FROM questions WHERE id_responder = {0} AND verify=1".format(id_responder)
         with self.connection:
             verified = self.cursor.execute(sqlStr).fetchall()
+            if len(verified) > 1:
+                raise Exception('Commands: Incorrect SQL response - too long verified count')
+            verified = verified[0][0]
         return {'answered': answered, 'checked': checked, 'verified': verified}
 
     def getUsers(self):
@@ -166,12 +175,32 @@ class workWithData:
         Получение всех пользователей из таблицы
         :return: Список id всех пользователей
         """
-        sqlStr = "SELECT id_sender, id_responder, wrongResponders FROM questions"
+
         base = {}
+
+        sqlStr = "SELECT id_sender FROM questions"
         with self.connection:
             temp = self.cursor.execute(sqlStr).fetchall()
         for elem in temp:
-            print elem
+            cur_id = elem[0]
+            base[cur_id] = self.getStat(cur_id)
+
+        sqlStr = "SELECT id_responder FROM questions"
+        with self.connection:
+            temp = self.cursor.execute(sqlStr).fetchall()
+        for elem in temp:
+            cur_id = elem[0]
+            base[cur_id] = self.getStat(cur_id)
+
+        sqlStr = "SELECT wrongResponders FROM questions"
+        with self.connection:
+            temp = self.cursor.execute(sqlStr).fetchall()
+        for elem in temp:
+            users = elem[0].split(',')
+            for cur_user in users:
+                cur_id = cur_user
+                base[cur_id] = self.getStat(cur_id)
+
         return base
 
     def __del__(self):
