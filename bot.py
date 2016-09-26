@@ -39,8 +39,10 @@ class TeacherAssistantBot:
         fh = logging.FileHandler(self.config.log)
 
         # Users db
+        self.db = workWithData()
         self.users = self.LoadUsersFromDB()
-        self.users[ChatBotID] = User()
+        self.users[ChatBotID] = User(ChatBotID)
+        self.db.addUser(ChatBotID)
         # Questions db
         self.questionsQueue = []
 
@@ -266,12 +268,11 @@ class TeacherAssistantBot:
         self.bot.polling(none_stop=True)
 
     def LoadUsersFromDB(self):
-        loader = workWithUsersData()
-        loadedUsers = loader.readRows()
+        loadedUsers = self.db.getUsers()
         users = {}
         for i in loadedUsers.keys():
-            user = User()
-            user.statistics = loadedUsers[i]
+            user = User(loadedUsers[i].key())
+            user.statistics = self.db.getStat(loadedUsers[i].key())
             users[i] = user
         self.logger.info('Users loaded from DB')
         return users

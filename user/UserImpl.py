@@ -4,7 +4,7 @@ import logging
 __author__ = 'g.lavrentyeva'
 
 class User:
-    def __init__(self):
+    def __init__(self, id_):
         self.config = settings()
 
         self.logger = logging.getLogger('BotLogger.User')
@@ -20,6 +20,7 @@ class User:
         self.logger.info('Init done')
         self.isBusy = False
         self.answerQueue = []
+        self.id = id_
 
     def SetSuperUser(self):
         self.logger.info('SetSuperUser')

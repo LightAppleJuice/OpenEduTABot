@@ -27,7 +27,8 @@ class workWithData:
                                                                      wrongResponders Text(500),
                                                                      checked INTEGER,
                                                                      verify INTEGER)''')
-
+        self.cursor.execute('''CREATE TABLE if not exists users (id_user COUNTER CONSTRAINT PrimaryKey PRIMARY KEY,
+                                                                 status INTEGER)''')
         self.logger.info('Init done')
 
     def addQuestion(self, question, id_sender):
@@ -170,7 +171,32 @@ class workWithData:
             verified = verified[0][0]
         return {'answered': answered, 'checked': checked, 'verified': verified}
 
+    def addUser(self, id_user):
+
+        sqlStr = "INSERT INTO users VALUES ({0}, 0)".format(id_user)
+        with self.connection:
+            try:
+                self.cursor.execute(sqlStr)
+            except sqlite3.IntegrityError:
+                pass  # попытка повторной запист
+        self.logger.info('Added user: {0}'.format(id_user))
+
     def getUsers(self):
+
+        base = {}
+
+        sqlStr = "SELECT * FROM users"
+        with self.connection:
+            temp = self.cursor.execute(sqlStr).fetchall()
+        for elem in temp:
+            cur_id = elem[0]
+            if cur_id:
+                base[cur_id] = self.getStat(cur_id)
+            else:
+                raise Exception('Commands: no user id in the table')
+        return base
+
+    def getUsersOld(self):
         """
         Получение всех пользователей из таблицы
         :return: Список id всех пользователей
@@ -183,23 +209,29 @@ class workWithData:
             temp = self.cursor.execute(sqlStr).fetchall()
         for elem in temp:
             cur_id = elem[0]
-            base[cur_id] = self.getStat(cur_id)
+            if cur_id:
+                base[cur_id] = self.getStat(cur_id)
+            else:
+                raise Exception('Commands: no sender id in the table')
 
         sqlStr = "SELECT id_responder FROM questions"
         with self.connection:
             temp = self.cursor.execute(sqlStr).fetchall()
         for elem in temp:
+
             cur_id = elem[0]
-            base[cur_id] = self.getStat(cur_id)
+            if cur_id:
+                base[cur_id] = self.getStat(cur_id)
 
         sqlStr = "SELECT wrongResponders FROM questions"
         with self.connection:
             temp = self.cursor.execute(sqlStr).fetchall()
         for elem in temp:
-            users = elem[0].split(',')
-            for cur_user in users:
-                cur_id = cur_user
-                base[cur_id] = self.getStat(cur_id)
+            if elem[0]:
+                users = elem[0].split(',')
+                for cur_user in users:
+                    cur_id = int(cur_user)
+                    base[cur_id] = self.getStat(cur_id)
 
         return base
 
